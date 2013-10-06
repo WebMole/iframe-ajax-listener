@@ -56,44 +56,49 @@ function AjaxListener(target, callback)
         this.isSuperHandled = true;
         var sendTime = new Date().getTime();
 
-        // State changed inside this function
-        return function(initialCallback) {
+        /**
+         * @param callback {function} the callbackback of the original request. Must call it on every state change. 
+         */
+        var callbackWrapper = function(callback) {
             var startTime = new Date().getTime();
-            if (initialCallback === undefined)
+            if (callback === undefined)
             {
-                console.log("AJAXListener :: No Callback defined");
+                console.log("AJAXListener :: Super Callback << No Callback defined");
             }
             else
             {
-                console.log("AJAXListener :: Calling initialCallback");
+                console.log("AJAXListener :: Super Callback << Calling callback");
                 try {
-                    initialCallback();
+                    callback();
                 }
                 catch (e)
                 {
-                    console.log("Something went wrong with initialCallback");
+                    console.log("AJAXListener :: Super Callback << Something went wrong with callback");
                     console.log(e);
                 }
             }
 
-            if (this.onStateChange === undefined)
+            if (s_ajaxListener.target.onStateChange === undefined)
             {
                 // Tricky
-                console.log("AJAXListener :: onStateChange not defined");
-                this.onStateChange = s_ajaxListener.onStateChangeCallback(undefined);
+                console.log("AJAXListener :: Super Callback << onStateChange not defined");
+                //s_ajaxListener.target.onStateChange = s_ajaxListener.onStateChangeCallback(s_ajaxListener.superCallback(undefined));
             }
             else
             {
-                console.log("AJAXListener :: onStateChange defined, our callback will handle it");
-                this.onStateChange = s_ajaxListener.onStateChangeCallback(undefined);
+                console.log("AJAXListener :: Super Callback << onStateChange defined, our callback will handle it");
+                s_ajaxListener.target.onStateChange = s_ajaxListener.onStateChangeCallback(callback);
             }
 
             var endTime = new Date().getTime();
 
-            console.log("AJAXListener :: State #" + this.readyState + " - Callback Time: " + (endTime - startTime) + "ms - Ellapsed Time (After Callback): " + (startTime - sendTime) + "ms");
-            console.log("AjaxListener :: Request:");
-            console.log(this);
+            console.log("AJAXListener :: Super Callback << State #" + s_ajaxListener.target.readyState + " - Callback Time: " + (endTime - startTime) + "ms - Ellapsed Time (After Callback): " + (startTime - sendTime) + "ms");
+            console.log("AJAXListener :: Super Callback << Request:");
+            console.log(s_ajaxListener.target);
         };
+
+        // State changed inside this function
+        return callbackWrapper(initialCallback);
     };
 
     /**
@@ -103,12 +108,11 @@ function AjaxListener(target, callback)
      */
     s_ajaxListener.onStateChangeCallback = function(initialCallback)
     {
+        // Inside the current function, `this` should be an xmlHTTPRequest
         console.log(s_ajaxListener);
         if (this.readyState === 4)
         {
-            console.log("AhaxListener :: onStateChangeCallback >> State 4!");
             console.log(this);
-            console.log("AjaxListener :: onStateChangeCallback >> " + this + " Finished");
         }
         // let's call the request's onStateChange original callback if defined
         if (initialCallback !== undefined && initialCallback !== null)
@@ -125,7 +129,14 @@ function AjaxListener(target, callback)
         }
         else
         {
-            console.log("AjaxListener :: onStateChangeCallback >> initialCallback is undefined or null");
+            if (initialCallback === undefined)
+            {
+                console.log("AjaxListener :: onStateChangeCallback >> initialCallback is undefined");
+            }
+            else
+            {
+                console.log("AjaxListener :: onStateChangeCallback >> initialCallback is null");
+            }
         }
     };
 
