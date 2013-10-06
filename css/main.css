@@ -101,6 +101,11 @@ body {
    background: #cccccc;
 }
 
+body.ajax {
+    background: #333333 !important;
+    color: white;
+}
+
 .container
 {
     background: #eeeeee;
@@ -115,16 +120,24 @@ body {
     border-radius: 10px;
 }
 
+.ajax .container
+{
+    background: #111111 !important;
+    box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.5);
+}
+
 .left
 {
     width: 60%;
     float: left;
+    margin-left: 1%;
 }
 
 .right
 {
-    width: 20%;
-    float: right
+    width: 30%;
+    float: right;
+    margin-right: 1%;
 }
 
 h1
@@ -168,6 +181,23 @@ li {
     content: "Data: ";
 }
 
+input[type="text"], select
+{
+    display: block;
+}
+
+.warn
+{
+    color: lightyellow;
+}
+
+th
+{
+    text-align: left;
+}
+.ready {
+    color: green;
+}
 
 /* ==========================================================================
    Helper classes

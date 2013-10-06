@@ -21,15 +21,50 @@
 
         <h1>iFrame Ajax Listener</h1>
 
-        <div class="container">
+        <div class="container left">
             <h2>iframe with ajax requests</h2>
             <iframe id="iframe" src="ajax.html"></iframe>
-            <p>This iFrame page is available at <a target="_blank" href="ajax.html">ajax.html</a>
+
+            <input id="url" value="ajax.html"></input>
+            <button type="button" id="visit">Go</button>
+
+            <div id="status">
+                <h2 id="statusTitle">Status</h2>
+                <table>
+                    <tr>
+                        <th>Current Status</th>
+                        <td><a id="iframeStatus"></a></td>
+                    </tr>
+                    <tr>
+                        <th>Href</th>
+                        <td><a id="href"></a></td>
+                    </tr>
+                    <tr>
+                        <th>Host</th>
+                        <td id="host"></td>
+                    </tr>
+                    <tr>
+                        <th>Path Name</th>
+                        <td><a id="pathname"></a></td>
+                    </tr>
+                    <tr>
+                        <th>Protocol</th>
+                        <td id="protocol"></td>
+                    </tr>
+                    <tr>
+                        <th>Pages Loaded</th>
+                        <td id="pagesLoaded"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <p><b>Note 1:</b> For this example to fully work, you need to launch Chrome with <b>--disable-web-security</b> (sadly, yes). See <a href="http://stackoverflow.com/questions/3102819/chrome-disable-same-origin-policy">chrome-disable-same-origin-policy stack on stackoverflow</a>.</p>
+            <p><b>Note 2:</b> This example may not work directly with ajax.html on <a href="http://pages.github.com/">Github Pages</a>, you should consider trying a page that doesn't have that The X-Frame-Options <b>SAMEORIGIN</b> response header. <a href="https://developer.mozilla.org/en-US/docs/HTTP/X-Frame-Options" target="_blank">See X-Frame-Options on Mozilla Developer Network</a>.</p>
         </div>
 
-        <div class="container">
+        <div class="container right">
             <h2>Ajax answer:</h2>
-            Answer will appear here when the magic button is clicked
+            Data captured by the example callback should appear bellow
             <ol id='post'>
             </ol>
 
@@ -45,6 +80,7 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
         <script src="js/plugins.js"></script>
+        <script src="js/ajaxListener.js"></script>
         <script src="js/main.js"></script>
     </body>
 </html>

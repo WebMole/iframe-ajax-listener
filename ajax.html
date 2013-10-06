@@ -14,25 +14,32 @@
         <link rel="stylesheet" href="css/main.css">
         <script src="js/vendor/modernizr-2.6.2.min.js"></script>
     </head>
-    <body>
+    <body class="ajax">
         <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
         
         <h1>Ajax Requests</h1>
         <div class="container left">
-            <div id="simpleRequest">
-                <h2>Simple Request</h2>
-                <button type="button" class="ajax" id="simpleCall">Fire AJAX request</button>
-                <br />
-            </div>
 
             <div id="customRequest">
                 <h2>Custom Request</h2>
 
+                <input type="checkbox" id="useOpen" checked="true"></input> <label for="useOpen">Use Open Method</label> <small class="warn">(Breaks request if unchecked)</small><br>
+                <input type="checkbox" id="useSend" checked="true"></input> <label for="useSend">Use Send Method</label> <small class="warn">(Breaks request if unchecked)</small><br>
+
                 <select id="method">
-                    <option>POST</option>
-                    <option>GET</option>
+                    <option value="OPTIONS">OPTIONS</option>
+                    <option value="GET">GET</option>
+                    <option value="HEAD">HEAD</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                </select> <small class="warn">(PUT and DELETE unsupported)</small>
+
+                <select id="library">
+                    <option value="vanilla">Vanilla Javascript</option>
+                    <option value="jquery">jQuery</option>
                 </select>
 
                 <input type="text" id="data" placeholder=""></input>
