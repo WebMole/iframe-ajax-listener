@@ -44,100 +44,49 @@ function AjaxListener(target, callback)
         s_ajaxListener.callback = callback;
     };
 
+
     /**
      * This is a function that execute prior to the initial callback.
      *    Actual implementation captures time of the request
-     * @param {function} initialCallback The original callback that should execute
+     * @param {function} callback The original callback that should execute
      *    by default
-     * @return {function} Tricky function executed instead of initialCallback
+     * @return {function} Tricky function executed instead of initialHandler
      */
-    s_ajaxListener.superCallback = function(initialCallback) {
+    s_ajaxListener.superCallback = function() {
         console.log("AJAXListener :: Super Callback");
         this.isSuperHandled = true;
         var sendTime = new Date().getTime();
+        // State changed inside this function
 
         /**
-         * @param callback {function} the callbackback of the original request. Must call it on every state change. 
+         * @param handler {function} the handler of the original request. Must call it on every state change.
          */
-        var callbackWrapper = function(callback) {
+        var handlerWrapper = function(handler) {
             var startTime = new Date().getTime();
-            if (callback === undefined)
+            if (s_ajaxListener.originalCallback === undefined)
             {
-                console.log("AJAXListener :: Super Callback << No Callback defined");
+                console.error("AJAXListener :: Super callback << No handler defined");
             }
             else
             {
-                console.log("AJAXListener :: Super Callback << Calling callback");
+                console.log("AJAXListener :: Super callback << Calling handler");
                 try {
-                    callback();
+                    s_ajaxListener.originalCallback.apply(s_ajaxListener.target);
                 }
                 catch (e)
                 {
-                    console.log("AJAXListener :: Super Callback << Something went wrong with callback");
-                    console.log(e);
+                    console.error("AJAXListener :: Super callback << Something went wrong with handler");
+                    console.error(e);
                 }
-            }
-
-            if (s_ajaxListener.target.onStateChange === undefined)
-            {
-                // Tricky
-                console.log("AJAXListener :: Super Callback << onStateChange not defined");
-                //s_ajaxListener.target.onStateChange = s_ajaxListener.onStateChangeCallback(s_ajaxListener.superCallback(undefined));
-            }
-            else
-            {
-                console.log("AJAXListener :: Super Callback << onStateChange defined, our callback will handle it");
-                s_ajaxListener.target.onStateChange = s_ajaxListener.onStateChangeCallback(callback);
             }
 
             var endTime = new Date().getTime();
 
-            console.log("AJAXListener :: Super Callback << State #" + s_ajaxListener.target.readyState + " - Callback Time: " + (endTime - startTime) + "ms - Ellapsed Time (After Callback): " + (startTime - sendTime) + "ms");
-            console.log("AJAXListener :: Super Callback << Request:");
-            console.log(s_ajaxListener.target);
+            console.log("AJAXListener :: Super callback << handler Time: " + (endTime - startTime) + "ms - Ellapsed Time (After handler): " + (startTime - sendTime) + "ms");
+            console.log("AJAXListener :: Super callback << Request:");
         };
 
-        // State changed inside this function
-        return callbackWrapper(initialCallback);
-    };
-
-    /**
-     * Callback executed on StateChange inside the superCallback
-     * @param {function} initialCallback The original callback that should execute
-     *    by default
-     */
-    s_ajaxListener.onStateChangeCallback = function(initialCallback)
-    {
-        // Inside the current function, `this` should be an xmlHTTPRequest
-        console.log(s_ajaxListener);
-        if (this.readyState === 4)
-        {
-            console.log(this);
-        }
-        // let's call the request's onStateChange original callback if defined
-        if (initialCallback !== undefined && initialCallback !== null)
-        {
-            try
-            {
-                initialCallback();
-            }
-            catch(e)
-            {
-                console.log("AjaxListener :: onStateChangeCallback >> Something went wrong with initialCallback");
-                console.log(e);
-            }
-        }
-        else
-        {
-            if (initialCallback === undefined)
-            {
-                console.log("AjaxListener :: onStateChangeCallback >> initialCallback is undefined");
-            }
-            else
-            {
-                console.log("AjaxListener :: onStateChangeCallback >> initialCallback is null");
-            }
-        }
+        return handlerWrapper();
     };
 
     /**
@@ -166,7 +115,6 @@ function AjaxListener(target, callback)
             console.log("AjaxListener :: open >> GET Captured");
         }
         else if (s_ajaxListener.method.toLowerCase() === "post") {
-            s_ajaxListener.data = url.split('?')[1];
             console.log("AjaxListener :: open >> POST Captured with data", s_ajaxListener.data);
         }
         else if (s_ajaxListener.method.toLowerCase() === "options") {
@@ -189,7 +137,7 @@ function AjaxListener(target, callback)
      * @params {string} Only used for POST requests, it's the data sent ;)
      */
     s_ajaxListener.customXHRSend = function(params) {
-        console.log(s_ajaxListener);
+        console.log(s_ajaxListener.target);
         if (params === null)
         {
             console.log("AjaxListener :: send >> data is null");
@@ -205,21 +153,26 @@ function AjaxListener(target, callback)
         }
 
         // Attach the superCallback to the onReadyStateChange
-        this.onreadystatechange = s_ajaxListener.superCallback(this.onreadystatechange);
+        s_ajaxListener.originalCallback = this.onreadystatechange;
+        this.onreadystatechange = s_ajaxListener.superCallback;
 
         // Call the original xmlHTTPRequest.send method
-
-        console.log("debug bellow");
-        console.log(this);
-        console.log("debug up");
-
         s_ajaxListener.tempSend.apply(this, arguments);
 
         console.log("AjaxListener :: send >> Calling Custom Callback");
         s_ajaxListener.callback();
     };
 
+
+    // Construct
     this.setTarget(target);
     this.setCallback(callback);
 }
 
+var getParams = function(url) {
+    var regex = /[?&]([^=#]+)=([^&#]*)/g, params = {}, match;
+    while(match = regex.exec(url)) {
+        params[match[1]] = match[2];
+    }
+    return params;
+}
